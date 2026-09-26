@@ -39,6 +39,15 @@ export function middleware(request: NextRequest) {
     request: { headers: requestHeaders },
   });
   response.headers.set("Content-Security-Policy", csp);
+
+  // A per-request nonce is only meaningful for the HTML produced by that same
+  // request. If the Vercel Edge Network serves a cached HTML body while the
+  // middleware re-runs and emits a *fresh* CSP header, the cached body carries
+  // the old nonce, every hydration script is rejected, and the page goes blank
+  // on refresh. Keeping the response uncached guarantees the body and the CSP
+  // header always come from the same render, so the nonce can never go stale.
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+
   // expose the nonce if you need it in the app (optional)
   response.headers.set("x-nonce", nonce);
   return response;
