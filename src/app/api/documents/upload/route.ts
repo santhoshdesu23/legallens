@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { documentStore } from '@/lib/store';
 import { parseFileToText, chunkDocumentPages } from '@/lib/document-processor/parser';
 import { detectSensitiveInfo } from '@/lib/document-processor/pii-detector';
-import { LegalDocument } from '@/lib/types';
+import { DocumentPage, LegalDocument } from '@/lib/types';
 import { getSessionId, setSessionCookie } from '@/lib/session';
 import { maxUploadBytes, validateUploadedFile } from '@/lib/security/file-validation';
 import { toPublicDocument } from '@/lib/security/public-document';

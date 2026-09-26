@@ -12,32 +12,13 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
   },
-  // Basic Content Security Policy — restricts resource origins to self and required CDNs.
-  // Script and style src default to 'self'; unsafe-inline is allowed for styles because
-  // Next.js injects critical CSS inline. Adjust as the UI matures.
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      // Next.js injects inline scripts for hydration; nonce-based CSP requires additional
-      // configuration, so we start with strict-dynamic as a stepping-stone.
-      "script-src 'self' 'unsafe-inline'",
-      // Tailwind + Next.js inject inline styles
-      "style-src 'self' 'unsafe-inline'",
-      // Images: self + data URIs (used by some Next.js optimised images)
-      "img-src 'self' data:",
-      // Fonts served from the same origin
-      "font-src 'self'",
-      // API calls go only to self; Gemini/Groq are called server-side, never from the browser
-      "connect-src 'self'",
-      // No plugins / object embeds
-      "object-src 'none'",
-      // Iframes restricted to same origin
-      "frame-src 'self'",
-      // Blocks mixed content upgrades for HTTPS deployments
-      "upgrade-insecure-requests",
-    ].join('; '),
-  },
+  // NOTE: Content-Security-Policy is intentionally NOT set here.
+  // It is emitted by `src/middleware.ts`, which generates a per-request nonce and
+  // forwards it to Next.js via the `x-nonce` request header so that inline
+  // hydration scripts actually receive the matching `nonce` attribute.
+  // Declaring CSP here as well would emit a second, conflicting CSP header;
+  // browsers enforce the intersection of every CSP they receive, which blocks
+  // the hydration scripts and leaves the page blank.
 ];
 
 const nextConfig: NextConfig = {

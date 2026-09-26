@@ -26,7 +26,18 @@ export function middleware(request: NextRequest) {
     upgrade-insecure-requests;
   `.replace(/\s{2,}/g, " ").trim();
 
-  const response = NextResponse.next();
+  // Forward the nonce to Next.js on the REQUEST headers. Next.js reads the
+  // `x-nonce` request header and stamps the matching `nonce` attribute onto the
+  // inline scripts/styles it injects during SSR. Without this, the nonce in the
+  // CSP below would not match any script and the browser would block them all.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  // Next.js also reads the CSP itself to decide which scripts need the nonce.
+  requestHeaders.set("Content-Security-Policy", csp);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
   response.headers.set("Content-Security-Policy", csp);
   // expose the nonce if you need it in the app (optional)
   response.headers.set("x-nonce", nonce);
