@@ -9,6 +9,18 @@ export const metadata: Metadata = {
   description: "AI-powered legal document understanding, risk audit, comparative analysis, and lawyer preparation assistance.",
 };
 
+// LegalLens uses a per-request nonce CSP (see `src/middleware.ts`). Next.js can
+// only stamp that nonce onto the inline hydration scripts when it renders the
+// route per request. If a page is prerendered at build time, its inline scripts
+// are already written to disk with no nonce, so the browser blocks them and the
+// page renders blank.
+//
+// Declaring this on the root layout makes every route dynamic, so each response
+// gets a matching nonce. This costs nothing here: every page is already a client
+// component that fetches its data from the API at runtime, so the prerendered
+// HTML was only ever an empty shell.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
